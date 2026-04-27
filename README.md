@@ -14,5 +14,10 @@ This project analyzes sales data using SQL.
 In this project, SQL queries were used to extract and analyze data. 
 The dataset was cleaned and structured to answer key business questions.
 
+## Results
+- Top 5 best-selling products identified
+- Monthly revenue trends analyzed
+- Key insights generated for business decisions
+
 ## Author
 Aliagha Tagizade
