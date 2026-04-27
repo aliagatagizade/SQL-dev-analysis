@@ -1,0 +1,506 @@
+
+select 'Employee ' || first_name || q'!'s Salary is !' || salary || ' EUR'
+from employees;
+
+
+select
+first_name "Əməkdaş adı",
+salary "Əməkdaşın maaşı"
+from employees;
+
+
+select * from employees
+where salary between 5000 and 25000
+order by salary desc
+fetch first 25 rows only;
+
+
+SELECT *
+FROM employees
+WHERE first_name BETWEEN 'A' AND 'E'
+AND commission_pct IS NOT NULL;
+
+
+SELECT *
+FROM employees
+WHERE (department_id = 50 OR department_id = 80 OR department_id = 90)
+AND (last_name LIKE 'A%' OR last_name LIKE '%a');
+
+
+SELECT *
+FROM (
+  SELECT first_name, salary,
+         ROW_NUMBER() OVER (ORDER BY salary DESC) rn
+  FROM employees
+)
+WHERE rn = 5;
+
+SELECT *
+FROM (
+  SELECT first_name, salary,
+         dense_rank() OVER (ORDER BY salary DESC) rn
+  FROM employees
+)
+WHERE rn = 5;
+
+
+
+select * from employees
+where mod(employee_id,2)=0
+and first_name like '%a_'
+and manager_id in(145,146,147);
+
+SELECT *
+FROM employees
+WHERE MOD(employee_id,2)=0
+AND SUBSTR(first_name, -2,1)='a'
+AND (manager_id=145 OR manager_id=146 OR manager_id=147)
+ORDER BY salary DESC;
+
+select * from employees
+where substr(first_name,1,3)='a'
+and substr(last_name,-3,1)='y';
+
+SELECT *
+FROM employees
+WHERE SUBSTR(first_name,3,1)='a'
+AND SUBSTR(last_name,-3,1)='y';
+
+select
+sum(c),
+avg(c),
+max(c),
+min(c)
+from(select
+length(first_name || last_name) c
+from employees);
+
+select
+first_name,
+last_name,
+sysdate-hire_date gun,
+months_between(sysdate,hire_date) ay,
+months_between(sysdate,hire_date)/12 il
+from employees;
+
+select
+first_name,
+last_name,
+salary,
+commission_pct,
+salary+salary*nvl(commission_pct,0) kom
+from employees
+where salary+salary*nvl(commission_pct,0) > 15000;
+
+select
+months_between(sysdate,hire_date)/12,
+salary*1.5
+from employees
+where months_between(sysdate,hire_date)/12 >10;
+
+select
+first_name || ' ' || last_name,
+salary,
+department_name,
+city,
+street_address
+from employees e join departments d
+on e.department_id = d.department_id
+join locations l
+on d.location_id = l.location_id
+where salary > 10000
+and city in('Seattle','Oxford','London');
+
+select
+first_name || ' ' || last_name,
+salary,
+department_name,
+city,
+street_address,
+country_name
+from employees e join departments d
+on e.department_id = d.department_id
+join locations l
+on d.location_id = l.location_id
+join countries c
+on l.country_id = c.country_id
+where salary > 10000
+and city in('Seattle','Oxford','London')
+and country_name in('United Kingdom','United States of America');
+
+select
+hire_date + interval '10-3' year to month +10
+from employees
+where hire_date + interval '10-3' year to month +10 > sysdate;
+
+select * from employees;
+
+select
+next_day(hire_date,'sunday')
+from employees;
+
+select
+last_day(hire_date) - hire_date gun
+from employees
+where last_day(hire_date) - hire_date > 10;
+
+select
+phone_number,
+substr(phone_number,3,3)
+from employees
+where substr(phone_number,3,3) = '515';
+
+SELECT *
+FROM employees
+WHERE SUBSTR(phone_number,3,3)='515';
+
+select
+case
+when SUBSTR(phone_number,3,3)= '515' then '515'
+when SUBSTR(phone_number,3,3)= '590' then '590'
+when SUBSTR(phone_number,3,3)= '650' then '650'
+else 'Others'
+end qrup
+from employees;
+
+select * from employees;
+
+select
+first_name,
+hire_date,
+case
+when to_char(hire_date,'mm') in ('12','01','02') then salary+300
+when to_char(hire_date,'mm') in ('03','04','05') then salary+350
+when to_char(hire_date,'mm') in ('06','07','08') then salary+400
+when to_char(hire_date,'mm') in ('09','10','11') then salary+450
+end artim
+from employees;
+
+select
+nvl(commission_pct,manager_id)
+from employees;
+
+select
+count(*) say,
+country_name
+from employees e join departments d
+on e.department_id = d.department_id
+join locations l
+on d.location_id = l.location_id
+join countries c
+on l.country_id = c.country_id
+group by country_name
+having count(*) > 2
+order by say desc;
+
+select
+e.first_name,
+m.first_name manager
+from employees e left join employees m
+on m.employee_id = e.manager_id;
+
+select
+first_name,last_name,salary,country_name
+from employees e join departments d on e.department_id = d.department_id
+join locations l on d.location_id = l.location_id 
+join countries c on l.country_id = c.country_id
+where country_name = 'Canada'
+union
+select
+first_name,last_name,salary,country_name
+from employees e join departments d on e.department_id = d.department_id
+join locations l on d.location_id = l.location_id 
+join countries c on l.country_id = c.country_id
+where country_name = 'Germany';
+
+select *
+from(
+select
+first_name,
+salary,
+department_name,
+dense_rank() over ( partition by department_name order by salary desc) ranks
+from employees e join departments d
+on e.department_id = d.department_id)
+where ranks = 5;
+
+--33
+select
+country_name,
+count(*) say,
+sum(salary) cem_maas,
+round(avg(salary),2) ort_maas,
+min(salary),
+max(salary)
+from employees e join departments d
+on e.department_id = d.department_id
+join locations l 
+on d.location_id = l.location_id
+join countries c
+on l.country_id = c.country_id
+group by country_name;
+
+
+--34
+select
+city,
+count(*) say,
+round(avg(salary),2) ort_maas
+from employees e join departments d
+on e.department_id = d.department_id
+join locations l 
+on d.location_id = l.location_id
+group by city;
+
+
+select
+to_char(sysdate,'ddd')
+from dual;
+
+create table addresss(
+id number primary key,
+street_address varchar2(100),
+city varchar2(30) not null,
+country varchar2(50),
+postal_code number,
+constraint fk_students foreign key (id) references students(id));
+
+
+select * from addresss;
+
+desc addresss;
+
+insert into addresss values(1,'Abbasqulu Abbaszade','Baku','AZE','121');
+
+commit;
+
+update addresss
+set postal_code=1000
+where id = 1;
+
+
+select * from employees;
+select * from students;
+
+alter table addresss
+modify city varchar2(70);
+
+delete from addresss
+where id = 1;
+
+select
+s.*,
+a.city
+from students s left join addresss a
+on s.id=a.id;
+
+truncate table addresss;
+
+drop table addresss;
+
+create table employee_email(
+id number primary key,
+email varchar2(70)
+);
+
+select
+lower(first_name || '.' || last_name || '@gmail.com') email
+from employees;
+
+
+create table dummy_emp as(
+select * from employees);
+
+select * from dummy_emp;
+
+update dummy_emp
+set salary = salary*1.2
+where job_id = 'IT_PROG';
+
+commit;
+
+select
+job_id,
+listagg(first_name,',') within group (order by first_name) adlar
+from employees
+group by job_id;
+
+select
+regexp_replace(listagg(first_name,',') within group (order by first_name),'[^,]', ' ' ) verg
+from employees;
+
+select
+manager_id,
+count(*) say
+from employees
+where manager_id in (100,101,102,103,108)
+group by manager_id
+order by say desc;
+
+
+SELECT LISTAGG(manager_id || ':' || COUNT(*), ', ')
+       WITHIN GROUP (ORDER BY COUNT(*) DESC) nəticə
+FROM employees
+WHERE manager_id IN (100,101,102,103,108)
+GROUP BY manager_id;
+
+SELECT DISTINCT manager_id,
+       COUNT(*) OVER (PARTITION BY manager_id) say
+FROM employees
+WHERE manager_id IN (100,101,102,103,108)
+ORDER BY say DESC;
+
+select * from (
+select
+    manager_id
+from employees)
+pivot(
+count(*)
+for manager_id in (100,101,102,103,108));
+
+select
+    'Biz' col1,
+    'Nicode acadamyde' col2,
+    'Oracel SQL' col3,
+    'öyrənirik' col4
+from dual;
+
+
+select systimestamp from dual;
+
+select dbtimezone from dual;
+select
+sessiontimezone from dual;
+
+select * from employees
+order by salary desc
+fetch first 10 row only;
+
+select
+    first_name,
+    replace(lower(first_name), 'david', 'sabir')
+from employees;
+select
+    sign(25)
+from dual;
+
+select
+    floor(1.9999999999999)
+from dual;
+
+select
+    to_char(sysdate, 'q')
+from dual;
+
+select
+    to_char(sysdate, 'cc')
+from dual;
+select
+    to_char(sysdate, 'RM')
+from dual;
+select
+    nullif('cay', 'say')
+from dual;
+
+select
+    first_name,
+    last_name,
+    salary,
+    department_id,
+    row_number() over(order by salary desc) sira
+from employees;
+
+select
+    first_name,
+    last_name,
+    salary,
+    department_id,
+    rank() over(order by salary desc) sira
+from employees;
+
+select
+    first_name,
+    last_name,
+    salary,
+    department_id,
+    dense_rank() over(order by salary desc) sira
+from employees;
+
+select
+    first_name,
+    last_name,
+    salary,
+    department_id,
+    row_number() over(partition by department_id order by salary desc) sira
+from employees;
+
+select
+    first_name,
+    last_name,
+    salary,
+    lag(salary) over(order by salary) sira
+from employees;
+
+select * from departments d
+where  exists (
+select 1
+from employees e
+where e.department_id = d.department_id);
+
+select * from departments d
+where  not exists (
+select 1
+from employees e
+where e.department_id = d.department_id);
+
+select * from employees
+where salary =any(5000,6000,7000,8000)
+order by salary desc;
+
+select * from employees
+where salary <all(5000,6000,7000,8000)
+order by salary desc;
+
+select 
+    first_name,last_name, salary,hire_date
+from employees
+where salary between 6000 and 17000
+intersect
+select 
+    first_name,last_name, salary,hire_date
+from employees
+where salary between 10000 and 25000
+order by first_name, salary;
+
+select 
+    first_name,last_name, salary,hire_date
+from employees
+where salary between 6000 and 17000
+minus
+select 
+    first_name,last_name, salary,hire_date
+from employees
+where salary between 10000 and 25000
+order by first_name, salary;
+
+select
+    department_id,
+    job_id,
+    count(*) say,
+    sum(salary) cem_maas
+from employees
+group by grouping sets(department_id, job_id, ());
+
+select
+    department_id,
+    count(*) say
+from employees
+group by cube(department_id);
+
+select
+    first_name,
+    last_name,
+    salary,
+    department_id,
+    decode(department_id,30, 500, 60, 600, 80, 700) bonus
+from employees;
