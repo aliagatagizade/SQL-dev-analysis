@@ -20,4 +20,4 @@ The dataset was cleaned and structured to answer key business questions.
 - Key insights generated for business decisions
 
 ## Author
-Aliagha Tagizade
+Aliagha Taghizadeh
